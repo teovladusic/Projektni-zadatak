@@ -1,0 +1,91 @@
+﻿@model Projektni_Zadatak_Project_Service.Helpers.PagedList<MVC_Application.Models.VehicleMakeViewModel>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Index";
+
+}
+@section scripts{
+    <script type="text/javascript">
+        document.getElementById("orderByControl").value = "@ViewData["OrderBy"]";
+    </script>
+}
+<h1>Vehicle Makes</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<form asp-action="Index" method="get">
+    <div class="form-outline">
+        <p>
+            Search: <input type="text" name="SearchQuery" value="@ViewData["SearchQuery"]" />
+        </p>
+    </div>
+    <div class="form-group">
+        <label for="orderByControl">Order by</label>
+        <select class="form-control" id="orderByControl" name="OrderBy">
+            <option>Order By</option>
+            <option>name desc</option>
+            <option>name asc</option>
+            <option>abrv desc</option>
+            <option>abrv asc</option>
+        </select>
+    </div>
+    <p>
+        Items per page: <input type="number" name="PageSize" value="@ViewData["PageSize"]" />
+    </p>
+    <button type="submit" value="Search" class="btn btn-primary">Submit</button>
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Name)
+
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Abrv)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Abrv)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { item.Id }) |
+                    @Html.ActionLink("Details", "Details", new { item.Id }) |
+                    @Html.ActionLink("Delete", "Delete", new { item.Id })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@{
+    var prevDisabled = !Model.HasPrevious ? "disabled" : "";
+    var nextDisabled = !Model.HasNext ? "disabled" : "";
+}
+<a asp-action="Index"
+   asp-route-PageNumber="@(Model.CurrentPage - 1)"
+   asp-route-PageSize="@ViewData["PageSize"]"
+   asp-route-OrderBy="@ViewData["OrderBy"]"
+   asp-route-SearchQuery="@ViewData["SearchQuery"]"
+   class="btn btn-default @prevDisabled">
+    Previous
+</a>
+<a asp-action="Index"
+   asp-route-PageNumber="@(Model.CurrentPage + 1)"
+   asp-route-PageSize="@ViewData["PageSize"]"
+   asp-route-OrderBy="@ViewData["OrderBy"]"
+   asp-route-SearchQuery="@ViewData["SearchQuery"]"
+   class="btn btn-default @nextDisabled">
+    Next
+</a>

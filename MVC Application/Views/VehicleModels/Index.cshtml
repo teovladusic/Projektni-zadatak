@@ -1,0 +1,109 @@
+﻿@model MVC_Application.Models.ListVehicleModelViewModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+@section scripts{
+    <script type="text/javascript">
+        document.getElementById("orderByControl").value = "@ViewData["OrderBy"]";
+        document.getElementById("makeControl").value = "@ViewData["MakeName"]";
+    </script>
+}
+<h1>Vehicle Models</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<form asp-action="Index" method="get">
+    <div class="form-outline">
+        <p>
+            Search: <input type="text" name="SearchQuery" value="@ViewData["SearchQuery"]" />
+        </p>
+    </div>
+    <div class="form-group">
+        <label for="orderByControl">Order by</label>
+        <select class="form-control" id="orderByControl" name="OrderBy">
+            <option>Order By</option>
+            <option>name desc</option>
+            <option>name asc</option>
+            <option>abrv desc</option>
+            <option>abrv asc</option>
+        </select> 
+    </div>
+    <div class="form-group">
+        <label for="makeControl">Select Make</label>
+        <select class="form-control" id="makeControl" name="MakeName">
+            <option>Select Make</option>
+            @foreach (var item in Model.VehicleMakes)
+            {
+                <option>@Html.DisplayFor(modelItem => item.Name)</option>
+            }
+        </select>
+    </div>
+    <div class="form-outline">
+        <p>
+            Items per page: <input type="number" name="PageSize" value="@ViewData["PageSize"]" />
+        </p>
+    </div>
+    <button type="submit" value="Search" class="btn btn-primary">Submit</button>
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.VehicleModelViewModels[0].Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.VehicleModelViewModels[0].Abrv)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.VehicleModelViewModels[0].MakeName)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.VehicleModelViewModels)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Abrv)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MakeName)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { item.Id }) |
+                    @Html.ActionLink("Details", "Details", new { item.Id }) |
+                    @Html.ActionLink("Delete", "Delete", new { item.Id })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@{
+    var prevDisabled = !Model.VehicleModelViewModels.HasPrevious ? "disabled" : "";
+    var nextDisabled = !Model.VehicleModelViewModels.HasNext ? "disabled" : "";
+}
+<a asp-action="Index"
+   asp-route-PageNumber="@(Model.VehicleModelViewModels.CurrentPage - 1)"
+   asp-route-PageSize="@ViewData["PageSize"]"
+   asp-route-OrderBy="@ViewData["OrderBy"]"
+   asp-route-SearchQuery="@ViewData["SearchQuery"]"
+   asp-route-MakeName="@ViewData["MakeName"]"
+   class="btn btn-default @prevDisabled">
+    Previous
+</a>
+<a asp-action="Index"
+   asp-route-PageNumber="@(Model.VehicleModelViewModels.CurrentPage + 1)"
+   asp-route-PageSize="@ViewData["PageSize"]"
+   asp-route-OrderBy="@ViewData["OrderBy"]"
+   asp-route-SearchQuery="@ViewData["SearchQuery"]"
+   asp-route-MakeName="@ViewData["MakeName"]"
+   class="btn btn-default @nextDisabled">
+    Next
+</a>
