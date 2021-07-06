@@ -8,6 +8,7 @@ using Projektni_Zadatak_Project_Service.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using class_library.Helpers;
 
 namespace MVC_Application.Controllers
 {
@@ -26,27 +27,28 @@ namespace MVC_Application.Controllers
 
         // GET /vehiclemakes
         [HttpGet("[controller]")]
-        public async Task<IActionResult> Index([FromQuery] VehicleMakeParameters vehicleMakeParameters)
+        public async Task<IActionResult> Index([FromQuery] VehicleMakeParams vehicleMakeParams)
         {
-            ViewData["OrderBy"] = (string.IsNullOrEmpty(vehicleMakeParameters.OrderBy))
-                ? "Order By" : vehicleMakeParameters.OrderBy;
+            ViewData["OrderBy"] = (string.IsNullOrEmpty(vehicleMakeParams.OrderBy))
+                ? "Order By" : vehicleMakeParams.OrderBy;
 
-            ViewData["PageSize"] = vehicleMakeParameters.PageSize;
-            ViewData["SearchQuery"] = vehicleMakeParameters.SearchQuery;
+            ViewData["PageSize"] = vehicleMakeParams.PageSize;
+            ViewData["SearchQuery"] = vehicleMakeParams.SearchQuery;
 
-            _logger.LogInformation(vehicleMakeParameters.PageNumber.ToString());
-            _logger.LogInformation(vehicleMakeParameters.PageSize.ToString());
-
-            if (vehicleMakeParameters.OrderBy == "Order By")
+            if (vehicleMakeParams.OrderBy == "Order By")
             {
-                vehicleMakeParameters.OrderBy = null;
+                vehicleMakeParams.OrderBy = null;
             }
 
-            var vehicleMakes = await _vehicleService.GetVehicleMakes(vehicleMakeParameters);
+            VehicleMakesFilter vehicleMakesFilter = new(vehicleMakeParams.SearchQuery);
+            SortParams sortParams = new(vehicleMakeParams.OrderBy);
+            PagingParams pagingParams = new(vehicleMakeParams.PageNumber, vehicleMakeParams.PageSize);
+
+            var vehicleMakes = await _vehicleService.GetVehicleMakes(vehicleMakesFilter, pagingParams, sortParams);
             var vehicleMakeViewModels = _mapper.Map<List<VehicleMakeViewModel>>(vehicleMakes);
             
             PagedList<VehicleMakeViewModel> pagedVehicleViewMakes = new(vehicleMakeViewModels,
-                vehicleMakes.TotalCount, vehicleMakeParameters.PageNumber, vehicleMakeParameters.PageSize);
+                vehicleMakes.TotalCount, vehicleMakeParams.PageNumber, vehicleMakeParams.PageSize);
 
             return View(pagedVehicleViewMakes);
         }

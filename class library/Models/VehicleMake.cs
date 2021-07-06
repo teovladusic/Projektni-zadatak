@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Projektni_Zadatak_Project_Service.Models
 {
@@ -11,5 +12,7 @@ namespace Projektni_Zadatak_Project_Service.Models
 
         [Required]
         public string Abrv { get; set; }
+
+        public List<VehicleModel> VehicleModels { get; set; }
     }
 }

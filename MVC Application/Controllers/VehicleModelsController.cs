@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using class_library;
+using class_library.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MVC_Application.Models;
 using Projektni_Zadatak_Project_Service.Helpers;
 using Projektni_Zadatak_Project_Service.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,47 +28,40 @@ namespace MVC_Application.Controllers
 
         // GET vehiclemodels
         [HttpGet("[controller]")]
-        public async Task<IActionResult> Index([FromQuery] VehicleModelParameters vehicleModelParameters)
+        public async Task<IActionResult> Index([FromQuery] VehicleModelParams vehicleModelParams)
         {
-            ViewData["MakeName"] = (string.IsNullOrEmpty(vehicleModelParameters.MakeName))
-                ? "Select Make" : vehicleModelParameters.MakeName;
+            ViewData["MakeName"] = (string.IsNullOrEmpty(vehicleModelParams.MakeName))
+                ? "Select Make" : vehicleModelParams.MakeName;
 
-            ViewData["OrderBy"] = (string.IsNullOrEmpty(vehicleModelParameters.OrderBy))
-                ? "Order By" : vehicleModelParameters.OrderBy;
+            ViewData["OrderBy"] = (string.IsNullOrEmpty(vehicleModelParams.OrderBy))
+                ? "Order By" : vehicleModelParams.OrderBy;
 
-            ViewData["SearchQuery"] = vehicleModelParameters.SearchQuery;
+            ViewData["SearchQuery"] = vehicleModelParams.SearchQuery;
 
-            ViewData["PageSize"] = vehicleModelParameters.PageSize;
+            ViewData["PageSize"] = vehicleModelParams.PageSize;
 
-            if (vehicleModelParameters.OrderBy == "Order By")
+            if (vehicleModelParams.OrderBy == "Order By")
             {
-                vehicleModelParameters.OrderBy = null;
+                vehicleModelParams.OrderBy = null;
             }
 
-            if (vehicleModelParameters.MakeName == "Select Make")
+            if (vehicleModelParams.MakeName == "Select Make")
             {
-                vehicleModelParameters.MakeName = null;
+                vehicleModelParams.MakeName = null;
             }
 
-            var vehicleModels = await _vehicleService.GetVehicleModels(vehicleModelParameters);
+            VehicleModelsFilter vehicleModelsFilters = new(vehicleModelParams.SearchQuery, vehicleModelParams.MakeName); 
+            SortParams sortParams = new(vehicleModelParams.OrderBy);
+            PagingParams pagingParams = new(vehicleModelParams.PageNumber, vehicleModelParams.PageSize);
 
-            List<VehicleModelViewModel> vehicleModelViewModels = new();
-            var vehicleMakes = await _vehicleService.GetVehicleMakes(new());
+            var vehicleModels = await _vehicleService.GetVehicleModels(vehicleModelsFilters, sortParams, pagingParams);
 
-            foreach (VehicleModel vehicleModel in vehicleModels)
-            {
-                var vehicleMake = await _vehicleService.GetVehicleMake(vehicleModel.MakeId);
-                if (vehicleMake is null)
-                {
-                    continue;
-                }
-                VehicleModelViewModel vehicleModelViewModel =
-                    VehicleModelViewModel.ToVehicleModelViewModel(vehicleModel, vehicleMake);
-                vehicleModelViewModels.Add(vehicleModelViewModel);
-            }
+            var vehicleModelViewModels = _mapper.Map<List<VehicleModelViewModel>>(vehicleModels);
+            
+            var vehicleMakes = await _vehicleService.GetAllVehicleMakes();
 
             PagedList<VehicleModelViewModel> pagedVehicleModelViewModels = new(vehicleModelViewModels, 
-                vehicleModels.TotalCount, vehicleModelParameters.PageNumber, vehicleModelParameters.PageSize);
+                vehicleModels.TotalCount, vehicleModelParams.PageNumber, vehicleModelParams.PageSize);
 
             ListVehicleModelViewModel listVehicleModelViewModel = new()
             {
@@ -92,15 +87,7 @@ namespace MVC_Application.Controllers
                 return NotFound();
             }
 
-            var vehicleMake = await _vehicleService.GetVehicleMake(vehicleModel.MakeId);
-
-            if (vehicleMake is null)
-            {
-                return NotFound();
-            }
-
-            VehicleModelViewModel vehicleModelViewModel =
-                VehicleModelViewModel.ToVehicleModelViewModel(vehicleModel, vehicleMake);
+            var vehicleModelViewModel = _mapper.Map<VehicleModelViewModel>(vehicleModel);
 
             return View(vehicleModelViewModel);
         }
@@ -120,16 +107,9 @@ namespace MVC_Application.Controllers
                 return NotFound();
             }
 
-            var vehicleMake = await _vehicleService.GetVehicleMake(vehicleModel.MakeId);
+            var vehicleModelViewModel = _mapper.Map<VehicleModelViewModel>(vehicleModel);
 
-            if (vehicleMake is null)
-            {
-                return NotFound();
-            }
-
-            var vehicleMakeViewModel = VehicleModelViewModel.ToVehicleModelViewModel(vehicleModel, vehicleMake);
-
-            return View(vehicleMakeViewModel);
+            return View(vehicleModelViewModel);
         }
 
         // POST 
@@ -154,7 +134,7 @@ namespace MVC_Application.Controllers
 
         // POST vehicleModels/Create
         [HttpPost, ActionName("Create")]
-        public async Task<IActionResult> Create([Bind("Name,Abrv,MakeId")] CreateVehicleModelViewModel createVehicleModelViewModel)
+        public async Task<IActionResult> Create([Bind("Name,Abrv,VehicleMakeId")] CreateVehicleModelViewModel createVehicleModelViewModel)
         {
             if (string.IsNullOrEmpty(createVehicleModelViewModel.Name) || string.IsNullOrEmpty(createVehicleModelViewModel.Abrv))
             {
@@ -189,15 +169,26 @@ namespace MVC_Application.Controllers
 
         // POST vehicleModels/Edit
         [HttpPost, ActionName("Edit")]
-        public async Task<IActionResult> Edit([Bind("Id,Name,Abrv,MakeId")] CreateVehicleModelViewModel createVehicleModelViewModel)
+        public async Task<IActionResult> Edit([Bind("Id,Name,Abrv,VehicleMakeId")] CreateVehicleModelViewModel createVehicleModelViewModel)
         {
             if (string.IsNullOrEmpty(createVehicleModelViewModel.Name) || string.IsNullOrEmpty(createVehicleModelViewModel.Abrv))
             {
                 return NotFound();
             }
 
+            var vehicleMake = _vehicleService.GetVehicleMake(createVehicleModelViewModel.VehicleMakeId);
+
             var vehicleModel = _mapper.Map<VehicleModel>(createVehicleModelViewModel);
-            await _vehicleService.UpdateVehicleModel(vehicleModel);
+
+            try
+            {
+                await _vehicleService.UpdateVehicleModel(vehicleModel);
+            }
+            catch (Exception e)
+            {
+                //if vehicleMakeId doesn't exist
+                return NotFound("Wrong VehicleMakeId");
+            }
             return RedirectToAction(nameof(Index));
         }
     }

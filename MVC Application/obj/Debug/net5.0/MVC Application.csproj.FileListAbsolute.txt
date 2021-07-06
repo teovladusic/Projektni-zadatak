@@ -171,3 +171,7 @@ C:\Users\Teo\source\repos\ProjektniZadatak\MVC Application\bin\Debug\net5.0\Syst
 C:\Users\Teo\source\repos\ProjektniZadatak\MVC Application\bin\Debug\net5.0\Microsoft.Web.Infrastructure.dll
 C:\Users\Teo\source\repos\ProjektniZadatak\MVC Application\bin\Debug\net5.0\Autofac.Extensions.DependencyInjection.dll
 C:\Users\Teo\source\repos\ProjektniZadatak\MVC Application\bin\Debug\net5.0\AutoMapper.Contrib.Autofac.DependencyInjection.dll
+C:\Users\Teo\source\repos\ProjektniZadatak\MVC Application\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.Design.dll
+C:\Users\Teo\source\repos\ProjektniZadatak\MVC Application\bin\Debug\net5.0\AutoMapper.Collection.dll
+C:\Users\Teo\source\repos\ProjektniZadatak\MVC Application\bin\Debug\net5.0\AutoMapper.Collection.EntityFrameworkCore.dll
+C:\Users\Teo\source\repos\ProjektniZadatak\MVC Application\bin\Debug\net5.0\AutoMapper.Extensions.ExpressionMapping.dll

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Projektni_Zadatak_Project_Service.Data;
 
-namespace Projektni_Zadatak_Project_Service.Migrations
+namespace class_library.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -26,9 +26,11 @@ namespace Projektni_Zadatak_Project_Service.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Abrv")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -44,17 +46,37 @@ namespace Projektni_Zadatak_Project_Service.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Abrv")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("MakeId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("VehicleMakeId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("VehicleMakeId");
+
                     b.ToTable("VehicleModels");
+                });
+
+            modelBuilder.Entity("Projektni_Zadatak_Project_Service.Models.VehicleModel", b =>
+                {
+                    b.HasOne("Projektni_Zadatak_Project_Service.Models.VehicleMake", "VehicleMake")
+                        .WithMany("VehicleModels")
+                        .HasForeignKey("VehicleMakeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("VehicleMake");
+                });
+
+            modelBuilder.Entity("Projektni_Zadatak_Project_Service.Models.VehicleMake", b =>
+                {
+                    b.Navigation("VehicleModels");
                 });
 #pragma warning restore 612, 618
         }

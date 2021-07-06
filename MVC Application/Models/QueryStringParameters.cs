@@ -2,6 +2,7 @@
 {
     public abstract class QueryStringParameters
     {
+        //all params that should exist in every model
         const int maxPageSize = 50;
 
         private int _pageNumber = 1;
@@ -40,7 +41,6 @@
                 }
             }
         }
-
         public string OrderBy { get; set; }
     }
 }

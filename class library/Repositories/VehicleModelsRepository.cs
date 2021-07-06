@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using class_library.Helpers;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Projektni_Zadatak_Project_Service.Data;
 using Projektni_Zadatak_Project_Service.Helpers;
 using Projektni_Zadatak_Project_Service.Models;
@@ -24,13 +26,7 @@ namespace Projektni_Zadatak_Project_Service.Repositories
 
         public async Task CreateVehicleModel(VehicleModel vehicleModel)
         {
-            VehicleModel newVehicleModel = new VehicleModel
-            {
-                Name = vehicleModel.Name,
-                Abrv = vehicleModel.Abrv,
-                MakeId = vehicleModel.MakeId
-            };
-            _context.Add(newVehicleModel);
+            _context.Add(vehicleModel);
             await _context.SaveChangesAsync();
         }
 
@@ -42,31 +38,32 @@ namespace Projektni_Zadatak_Project_Service.Repositories
 
         public async Task<VehicleModel> GetVehicleModel(int id)
         {
-            return await _context.VehicleModels.FindAsync(id);
+            return await _context.VehicleModels.Include(m => m.VehicleMake).FirstAsync(m => m.Id == id);
         }
 
-        public async Task<PagedList<VehicleModel>> GetVehicleModels(VehicleModelParameters vehicleModelParameters)
+        public async Task<PagedList<VehicleModel>> GetVehicleModels(VehicleModelsFilter vehicleModelsFilter,
+            SortParams sortParams, PagingParams pagingParams)
         {
-            var models = from v in _context.VehicleModels select v;
+            var models = _context.VehicleModels.Include(m => m.VehicleMake).AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(vehicleModelParameters.SearchQuery))
+            if (!string.IsNullOrWhiteSpace(vehicleModelsFilter.SearchQuery))
             {
-                models = models.Where(model => model.Name.Contains(vehicleModelParameters.SearchQuery)
-                || model.Abrv.Contains(vehicleModelParameters.SearchQuery));
+                models = models.Where(model => model.Name.Contains(vehicleModelsFilter.SearchQuery)
+                || model.Abrv.Contains(vehicleModelsFilter.SearchQuery));
             }
 
-            if (!string.IsNullOrEmpty(vehicleModelParameters.MakeName))
+            if (!string.IsNullOrEmpty(vehicleModelsFilter.MakeName))
             {
-                var make = _context.VehicleMakes.Where(make => make.Name == vehicleModelParameters.MakeName).FirstOrDefault();
-                models = models.Where(model => model.MakeId == make.Id);
+                var make = _context.VehicleMakes.Where(make => make.Name == vehicleModelsFilter.MakeName).FirstOrDefault();
+                models = models.Where(model => model.VehicleMakeId == make.Id);
             }
 
-            var sortedModels = _sortHelper.ApplySort(models, vehicleModelParameters.OrderBy);
+            var sortedModels = _sortHelper.ApplySort(models, sortParams.OrderBy);
 
             return await PagedList<VehicleModel>.ToPagedList(
                 sortedModels,
-                vehicleModelParameters.PageNumber,
-                vehicleModelParameters.PageSize,
+                pagingParams.CurrentPage,
+                pagingParams.PageSize,
                 sortedModels.Count());
         }
 

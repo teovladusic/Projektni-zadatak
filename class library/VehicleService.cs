@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using class_library.Helpers;
+using Microsoft.Extensions.Logging;
 using Projektni_Zadatak_Project_Service.Helpers;
 using Projektni_Zadatak_Project_Service.Models;
 using Projektni_Zadatak_Project_Service.Repositories;
@@ -22,9 +23,10 @@ namespace class_library
             _logger = logger;
         }
 
-        public async  Task<PagedList<VehicleMake>> GetVehicleMakes(VehicleMakeParameters vehicleMakeParameters)
+        public async  Task<PagedList<VehicleMake>> GetVehicleMakes(VehicleMakesFilter vehicleMakesFilter, 
+            PagingParams pagingParams, SortParams sortParams)
         {
-            var vehicleMakes = await _vehicleMakesRepository.GetVehicleMakes(vehicleMakeParameters);
+            var vehicleMakes = await _vehicleMakesRepository.GetVehicleMakes(vehicleMakesFilter, pagingParams, sortParams);
             return vehicleMakes;
         }
 
@@ -48,12 +50,15 @@ namespace class_library
             await _vehicleMakesRepository.UpdateVehicleMake(vehicleMake);
         }
 
-
-
-
-        public async Task<PagedList<VehicleModel>> GetVehicleModels(VehicleModelParameters vehicleModelParameters)
+        public Task<List<VehicleMake>> GetAllVehicleMakes()
         {
-            var vehicleModels = await _vehicleModelsRepository.GetVehicleModels(vehicleModelParameters);
+            return _vehicleMakesRepository.GetAllVehicleMakes();
+        }
+
+
+        public async Task<PagedList<VehicleModel>> GetVehicleModels(VehicleModelsFilter vehicleModelsFilter, SortParams sortParams, PagingParams pagingParams)
+        {
+            var vehicleModels = await _vehicleModelsRepository.GetVehicleModels(vehicleModelsFilter, sortParams, pagingParams);
             return vehicleModels;
         }
 
@@ -76,5 +81,6 @@ namespace class_library
         {
             await _vehicleModelsRepository.UpdateVehicleModel(vehicleModel);
         }
+
     }
 }

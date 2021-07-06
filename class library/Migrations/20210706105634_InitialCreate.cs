@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Projektni_Zadatak_Project_Service.Migrations
+namespace class_library.Migrations
 {
-    public partial class addVehicleMakesAndVehicleModels : Migration
+    public partial class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,8 +12,8 @@ namespace Projektni_Zadatak_Project_Service.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Abrv = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Abrv = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -26,23 +26,34 @@ namespace Projektni_Zadatak_Project_Service.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    MakeId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Abrv = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Abrv = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VehicleMakeId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_VehicleModels", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_VehicleModels_VehicleMakes_VehicleMakeId",
+                        column: x => x.VehicleMakeId,
+                        principalTable: "VehicleMakes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VehicleModels_VehicleMakeId",
+                table: "VehicleModels",
+                column: "VehicleMakeId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "VehicleMakes");
+                name: "VehicleModels");
 
             migrationBuilder.DropTable(
-                name: "VehicleModels");
+                name: "VehicleMakes");
         }
     }
 }
